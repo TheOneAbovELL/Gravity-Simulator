@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gravity-sim"
+dynamic = ["version"]
+description = "Interactive 3-D gravitational N-body simulator with leapfrog integration and Barnes-Hut forces"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Gerrit Fritz (original Barnes-Hut simulation)" }]
+dependencies = ["numpy>=1.24"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Environment :: X11 Applications",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: MacOS X",
+]
+
+[project.optional-dependencies]
+capture = ["Pillow>=9"]
+dev = ["pytest>=7", "ruff>=0.5", "mypy>=1.8"]
+
+[project.scripts]
+gravity-sim = "gravity_sim.cli:main"
+
+[tool.setuptools]
+packages = ["gravity_sim"]
+
+[tool.setuptools.dynamic]
+version = { attr = "gravity_sim.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = ["gui: needs a display (Tk window); skipped automatically when none is available"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py310"
+extend-exclude = ["legacy"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = [
+    "RUF001", "RUF002", "RUF003",  # intentional unicode symbols (θ, ☉, ⊕) in UI strings and docs
+]
+
+[tool.ruff.lint.per-file-ignores]
+"gravity_sim/presets.py" = ["E501"]  # aligned data tables
+
+[tool.mypy]
+python_version = "3.10"
+files = ["gravity_sim", "tests", "scripts"]
+strict = true
+warn_return_any = false  # numpy's stubs return Any from most array operations
+warn_unreachable = true
+exclude = ["legacy/"]
+
+[[tool.mypy.overrides]]
+module = ["PIL", "PIL.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
